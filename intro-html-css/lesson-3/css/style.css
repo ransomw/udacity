@@ -1,0 +1,65 @@
+body {
+    font-family: 'Lato', sans-serif;
+}
+
+
+hr {
+    border-top: 5px solid #eee;
+    margin-bottom: 8px;
+    margin-top: 10px;
+}
+
+.header {
+    padding-top: 30px;
+}
+
+.header h1 {
+    font-weight: 900;
+    font-size: 48px;
+}
+
+.content {
+    background-color: #131A2D;
+    padding-bottom: 40px;
+    margin-bottom: 30px;
+    color: #ccc;
+}
+
+.content .row [class*='col-']:not(:first-child) {
+    padding-left: 0px;
+}
+
+.content .row [class*='col-']:not(:last-child) {
+    padding-right: 0px;
+}
+
+.content [class*='col-'] {
+    margin-bottom: 15px;
+}
+
+.content h2 {
+    margin-left: 40px;
+    margin-bottom: 15px;
+    font-size: 34px;
+}
+
+.content h3 {
+    font-size: 36px;
+}
+
+.title-logo {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.row-main-img {
+    padding-top: 15px;
+}
+
+.row-main-img img {
+    width: 100%;
+}
+
+.featured-work img {
+    width: 90%;
+}

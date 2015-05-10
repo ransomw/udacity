@@ -1,0 +1,64 @@
+body {
+    font-family: Verdana, sans-serif;
+    font-size: 18px;
+    color: #666;
+}
+
+.container {
+    max-width: 960px;
+    margin-top: 28px;
+}
+
+header {
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-size: 52px;
+    font-weight: 600;
+}
+
+h2 {
+    color: #f07c17;
+}
+
+.row img {
+    margin-top: 15px;
+    margin-left: 4px;
+}
+
+.features {
+    margin-top: 30px;
+    margin-left: 4x;
+    padding-left: 30px;
+    padding-top: 5px;
+    padding-bottom: 25px;
+    border: solid;
+}
+
+ul {
+    margin-top: 30px;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+.description h2 {
+    margin-top: 10px;
+    margin-left: 4px;
+    font-weight: 700;
+    font-size: 28px;
+    margin-bottom: 38px;
+}
+
+p {
+    font-size: 18px;
+}
+
+.mockup-overlay {
+    top: 0;
+    position: absolute;
+    z-index: -1;
+    opacity: 0.4;
+}

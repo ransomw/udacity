@@ -1,0 +1,19 @@
+Requirements
+============
+
+Requires beautifulsoup4.  Run
+
+    pip install $(cat pip.txt)
+
+to install.
+
+Usage
+=====
+
+create and open webpage with
+
+    ./make_page.py
+
+create webpage only with
+
+    ./make_page.py -n
