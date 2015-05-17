@@ -6,7 +6,7 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
-\c vagrant;
+-- \c vagrant;
 DROP DATABASE IF EXISTS tournament;
 CREATE DATABASE tournament;
 \c tournament;
@@ -17,20 +17,21 @@ CREATE TABLE players (
 );
 
 CREATE TABLE matches (
+       id serial PRIMARY KEY,
        winner integer references players (id),
        loser integer references players (id)
 );
 
 CREATE VIEW standings AS
        SELECT players.id, p_name, wins, num_matches
-       FROM (SELECT id, count(winner) as wins
+       FROM (SELECT players.id, count(winner) as wins
              FROM players LEFT JOIN matches
-             ON id = winner
-             GROUP BY id) as wins_sel,
-            (SELECT id, count(winner) as num_matches
+             ON players.id = winner
+             GROUP BY players.id) as wins_sel,
+            (SELECT players.id, count(winner) as num_matches
              FROM players LEFT JOIN matches
-             ON id = winner OR id = loser
-             GROUP BY id) as matches_sel,
+             ON players.id = winner OR players.id = loser
+             GROUP BY players.id) as matches_sel,
             players
        WHERE wins_sel.id = players.id AND matches_sel.id = players.id
        ORDER BY wins DESC;
