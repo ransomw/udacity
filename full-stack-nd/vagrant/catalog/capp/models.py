@@ -9,6 +9,7 @@ import sqlalchemy.sql.functions as func
 
 from sqlalchemy.ext.declarative import declarative_base
 
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship
 
 from sqlalchemy import create_engine
@@ -70,3 +71,10 @@ engine = create_engine(
     'sqlite:///catalogapp.db')
 
 Base.metadata.create_all(engine)
+
+# ??? is it appropriate to initialize a DB session here?
+# I want to use the same session in both the view and view_helper
+# modules but avoid circular imports
+Base.metadata.bind = engine
+DBSession = sessionmaker(bind=engine)
+session = DBSession()

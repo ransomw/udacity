@@ -18,7 +18,6 @@ from flask import jsonify
 
 from sqlalchemy import asc
 from sqlalchemy import desc
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
 from oauth2client.client import flow_from_clientsecrets
@@ -27,21 +26,17 @@ from oauth2client.client import FlowExchangeError
 import httplib2
 import requests
 
-from models import engine
-from models import Base
 from models import User
 from models import Category
 from models import Item
+from models import session
+
+import view_helpers as vh
 
 from capp import app
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
-
-Base.metadata.bind = engine
-
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
 
 
 def login_required(f):
@@ -110,22 +105,6 @@ def login_testing(user_id):
     return redirect(url_for('home'))
 
 
-def _get_create_user(name, email):
-    """ get or create user record """
-    try:
-        user = session.query(User).filter_by(
-            email=email).one()
-    # todo: catch specific sqlalchemy exception
-    except:
-        new_user = User(name=name,
-                        email=email)
-        session.add(new_user)
-        session.commit()
-        user = session.query(User).filter_by(
-            email=email).one()
-    return user.id
-
-
 @app.route('/login/github')
 def login_github():
     # check random state string
@@ -167,7 +146,7 @@ def login_github():
     info_answer = requests.get(info_url, params=info_params)
     info_json = info_answer.json()
     # todo: error if name and email not present
-    user_id = _get_create_user(info_json['name'], info_json['email'])
+    user_id = vh.get_create_user(info_json['name'], info_json['email'])
     login_session['user_id'] = user_id
     return redirect(url_for('home'))
 
@@ -223,7 +202,7 @@ def gconnect():
     answer = requests.get(userinfo_url, params=params)
     data = answer.json()
     # get or create user record
-    user_id = _get_create_user(data['name'], data['email'])
+    user_id = vh.get_create_user(data['name'], data['email'])
     login_session['user_id'] = user_id
     return 'logged in'
 
@@ -246,25 +225,12 @@ def home():
                            items=items)
 
 
-def _item_from_form(item, form, user_id=None,
-                    save=True):
-    item.title = form['title']
-    item.description = form['description']
-    item.category_id = form['category']
-    if user_id is not None:
-        item.user_id = user_id
-    if save:
-        session.add(item)
-        session.commit()
-    return item
-
-
 @app.route('/catalog/item/new', methods=['GET', 'POST'])
 @login_required
 def item_new():
     if request.method == 'POST':
-        _item_from_form(Item(), request.form,
-                        user_id=login_session.get('user_id'))
+        vh.item_from_form(Item(), request.form,
+                          user_id=login_session.get('user_id'))
         return redirect(url_for('home'))
     else:
         categories = session.query(Category).all()
@@ -279,8 +245,8 @@ def item_edit(item_title):
     item = session.query(Item).filter_by(
         title=item_title).one()
     if request.method == 'POST':
-        _item_from_form(item, request.form,
-                        user_id=login_session.get('user_id'))
+        vh.item_from_form(item, request.form,
+                          user_id=login_session.get('user_id'))
         return redirect(url_for('home'))
     else:
         return render_template('item_add.html',
