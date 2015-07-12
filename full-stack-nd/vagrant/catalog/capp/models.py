@@ -11,6 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import validates
 
 from sqlalchemy import create_engine
 
@@ -57,6 +58,13 @@ class Item(Base):
     last_update = Column(
         DateTime, server_default=func.now(),
         onupdate=func.now())
+
+    @validates('description')
+    def validate_description(self, key, description):
+        if description == '':
+            raise ValueError(
+                "may not have empty description")
+        return description
 
     @property
     def serialize(self):

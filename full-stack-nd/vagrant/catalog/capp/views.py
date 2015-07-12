@@ -229,8 +229,11 @@ def home():
 @login_required
 def item_new():
     if request.method == 'POST':
-        vh.item_from_form(Item(), request.form,
-                          user_id=login_session.get('user_id'))
+        try:
+            vh.item_from_form(Item(), request.form,
+                              user_id=login_session.get('user_id'))
+        except ValueError as e:
+            return str(e)
         return redirect(url_for('home'))
     else:
         categories = session.query(Category).all()
@@ -245,8 +248,11 @@ def item_edit(item_title):
     item = session.query(Item).filter_by(
         title=item_title).one()
     if request.method == 'POST':
-        vh.item_from_form(item, request.form,
-                          user_id=login_session.get('user_id'))
+        try:
+            vh.item_from_form(item, request.form,
+                              user_id=login_session.get('user_id'))
+        except ValueError as e:
+            return str(e)
         return redirect(url_for('home'))
     else:
         return render_template('item_add.html',
