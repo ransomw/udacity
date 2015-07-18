@@ -35,7 +35,7 @@ import view_helpers as vh
 
 from capp import app
 
-CLIENT_ID = json.loads(
+G_CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 
 
@@ -95,7 +95,9 @@ def login():
             for _ in range(32)
         )
         login_session['state'] = state
-        return render_template('login.html', state=state)
+        return render_template('login.html',
+                               state=state,
+                               G_CLIENT_ID=G_CLIENT_ID)
 
 
 # disable for production, used only for dev w/o internet connection
@@ -190,7 +192,7 @@ def gconnect():
             json.dumps('token/user-id mismatch'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    if result['issued_to'] != CLIENT_ID:
+    if result['issued_to'] != G_CLIENT_ID:
         response = make_response(
             json.dumps('token/client-id mismatch'), 401)
         print 'token/client-id mismatch'
