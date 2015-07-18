@@ -34,6 +34,9 @@ class Category(Base):
     name = Column(
         String(80), nullable=False, unique=True)
 
+    def __str__(self):
+        return self.name
+
     @property
     def serialize(self):
         return {

@@ -1,6 +1,11 @@
+from pdb import set_trace as st
+
+from wtforms.ext.sqlalchemy.orm import model_form
+from wtforms.validators import ValidationError
+
 from models import session
 from models import User
-
+from models import Item
 
 def get_create_user(name, email):
     """ get or create user record """
@@ -29,3 +34,30 @@ def item_from_form(item, form, user_id=None,
         session.add(item)
         session.commit()
     return item
+
+
+class NotBlank(object):
+    """ Custom wtforms validator to make sure text fields
+    are non-empty """
+    def __init__(self):
+        pass
+
+    def __call__(self, form, field):
+        if (field.data is not None and
+            field.data.strip() == ''):
+            raise ValidationError((
+                "{label} may not be blank"
+                ).format(label=field.label.text))
+
+ItemForm = model_form(
+    Item,
+    db_session=session,
+    only=[
+        'title',
+        'description',
+        'category',
+    ],
+    # ??? duplicate validation ok?
+    field_args={
+        'description': {'validators': [NotBlank(),],},
+    })

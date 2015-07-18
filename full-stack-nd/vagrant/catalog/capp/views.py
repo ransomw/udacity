@@ -248,16 +248,21 @@ def item_edit(item_title):
     item = session.query(Item).filter_by(
         title=item_title).one()
     if request.method == 'POST':
+        form = vh.ItemForm(request.form, item)
+        if not form.validate():
+            return render_template('item_edit.html',
+                                   form=form)
+        form.populate_obj(item)
         try:
-            vh.item_from_form(item, request.form,
-                              user_id=login_session.get('user_id'))
+            session.add(item)
+            session.commit()
         except ValueError as e:
-            return str(e)
+            return "database error: " + str(e)
         return redirect(url_for('home'))
     else:
-        return render_template('item_add.html',
-                               categories=categories,
-                               item=item)
+        form = vh.ItemForm(obj=item)
+        return render_template('item_edit.html',
+                               form=form)
 
 
 @app.route('/catalog/<string:item_title>/delete',
