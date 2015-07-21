@@ -9,6 +9,7 @@
       <img src="/catalog/item/{{item.id}}/img">
       {% endif %}
       <p>Description: {{item.description}}</p>
+      {% if can_modify %}
       <a href="{{url_for('item_edit', item_title=item.title)}}">
         Edit
       </a>
@@ -16,6 +17,7 @@
       <a href="{{url_for('item_delete', item_title=item.title)}}">
         Delete
       </a>
+      {% endif %}
     </div>
   </div>
 </div>

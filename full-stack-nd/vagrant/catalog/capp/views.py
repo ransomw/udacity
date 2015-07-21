@@ -225,7 +225,7 @@ def logout():
 @app.route('/')
 def home():
     categories = session.query(Category).all()
-    # todo: most recent and sort by modify time
+    # todo: most recent
     items = session.query(Item).order_by(desc(Item.last_update))
     return render_template('home.html',
                            session=login_session,
@@ -276,6 +276,10 @@ def item_edit(item_title):
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(
         title=item_title).one()
+    user = session.query(User).filter_by(
+        id=login_session.get('user_id')).one()
+    if item.user is not None and item.user.id != user.id:
+        return redirect(url_for('home'))
     if request.method == 'POST':
         form = vh.ItemForm(request.form, item)
         if not form.validate():
@@ -304,6 +308,10 @@ def item_edit(item_title):
 def item_delete(item_title):
     item = session.query(Item).filter_by(
         title=item_title).one()
+    user = session.query(User).filter_by(
+        id=login_session.get('user_id')).one()
+    if item.user is not None and item.user.id != user.id:
+        return redirect(url_for('home'))
     if request.method == 'POST':
         img_filepath = vh.get_item_image_filepath(item.id)
         if os.path.isfile(img_filepath):
@@ -338,10 +346,13 @@ def item_detail(category_name, item_title):
         category_id=category.id).filter_by(
             title=item_title).one()
     has_img = vh.get_item_image_info(item.id) is not None
+    can_modify = (item.user is None or
+                  item.user.id == login_session.get('user_id'))
     return render_template('item.html',
                            session=login_session,
                            item=item,
-                           has_img=has_img)
+                           has_img=has_img,
+                           can_modify=can_modify)
 
 
 @app.route('/catalog/item/<int:item_id>/img')
