@@ -33,6 +33,7 @@ class Category(Base):
         Integer, primary_key=True)
     name = Column(
         String(80), nullable=False, unique=True)
+    items = relationship("Item", cascade="delete")
 
     def __str__(self):
         return self.name
@@ -55,7 +56,7 @@ class Item(Base):
     description = Column(String(250))
     category_id = Column(
         Integer, ForeignKey('category.id'), nullable=False)
-    category = relationship(Category, cascade="delete")
+    category = relationship(Category)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
     last_update = Column(
