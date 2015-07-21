@@ -19,6 +19,7 @@ from flask import jsonify
 from sqlalchemy import asc
 from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import SQLAlchemyError
 
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -237,7 +238,11 @@ def item_new():
             vh.item_from_form(Item(), request.form,
                               user_id=login_session.get('user_id'))
         except ValueError as e:
-            return str(e)
+            return "Database validation error: " + str(e)
+        except SQLAlchemyError as e:
+            # todo: log error, but don't display detailed message
+            # for security reasons
+            return "Database error: " + str(e)
         return redirect(url_for('home'))
     else:
         categories = session.query(Category).all()
@@ -261,7 +266,11 @@ def item_edit(item_title):
             session.add(item)
             session.commit()
         except ValueError as e:
-            return "database error: " + str(e)
+            return "Database validation error: " + str(e)
+        except SQLAlchemyError as e:
+            # todo: log error, but don't display detailed message
+            # for security reasons
+            return "Database error: " + str(e)
         return redirect(url_for('home'))
     else:
         form = vh.ItemForm(obj=item)
