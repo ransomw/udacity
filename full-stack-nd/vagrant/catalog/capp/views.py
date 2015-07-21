@@ -38,6 +38,7 @@ from models import session
 import view_helpers as vh
 
 from capp import app
+from capp import csrf
 
 G_CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -130,8 +131,8 @@ def login_github():
     # exchange access code for access token
     token_url = 'https://github.com/login/oauth/access_token'
     token_params = {
-        'client_id': 'fd76823f38c3fab6b951',
-        'client_secret': '09d09854fe176df5009752604ec49915ef7e2779',
+        'client_id': app.config['GITHUB_CLIENT_ID'],
+        'client_secret': app.config['GITHUB_CLIENT_SECRET'],
         'code': str(code),
     }
     token_headers = {
@@ -159,6 +160,7 @@ def login_github():
     return redirect(url_for('home'))
 
 
+@csrf.exempt
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # check that request is from the login page

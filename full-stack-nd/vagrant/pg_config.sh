@@ -7,6 +7,7 @@ pip install oauth2client
 pip install requests
 pip install httplib2
 pip install wtforms
+pip install flask-seasurf
 su postgres -c 'createuser -dRS vagrant'
 su vagrant -c 'createdb'
 su vagrant -c 'createdb forum'
