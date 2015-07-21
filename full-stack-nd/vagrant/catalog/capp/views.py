@@ -1,9 +1,11 @@
 from pdb import set_trace as st
 
+import os
 import random
 import string
 import json
 from functools import wraps
+import imghdr
 
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
@@ -15,6 +17,7 @@ from flask import make_response
 from flask import redirect
 from flask import url_for
 from flask import jsonify
+from flask import send_file
 
 from sqlalchemy import asc
 from sqlalchemy import desc
@@ -234,8 +237,9 @@ def home():
 @login_required
 def item_new():
     if request.method == 'POST':
+        # store form data
         try:
-            vh.item_from_form(Item(), request.form,
+            item = vh.item_from_form(Item(), request.form,
                               user_id=login_session.get('user_id'))
         except ValueError as e:
             return "Database validation error: " + str(e)
@@ -243,6 +247,22 @@ def item_new():
             # todo: log error, but don't display detailed message
             # for security reasons
             return "Database error: " + str(e)
+        # store image file
+        file_storage_pic = request.files['picture']
+        if file_storage_pic.filename != '':
+            file_path = vh.get_item_image_filepath(item.id)
+            file_storage_pic.save(file_path)
+            file_type = imghdr.what(file_path)
+            if file_type is None:
+                os.remove(file_type)
+                return ("form data stored, but "
+                        "uploaded file was not an image")
+            if file_type not in app.config['ITEM_IMG_EXTS']:
+                os.remove(file_type)
+                return ("form data stored, but "
+                        "uploaded file was not one of "
+                        "the supported types: "
+                ) + ', '.join(app.config['ITEM_IMG_EXTS'])
         return redirect(url_for('home'))
     else:
         categories = session.query(Category).all()
@@ -285,6 +305,9 @@ def item_delete(item_title):
     item = session.query(Item).filter_by(
         title=item_title).one()
     if request.method == 'POST':
+        img_filepath = vh.get_item_image_filepath(item.id)
+        if os.path.isfile(img_filepath):
+            os.remove(img_filepath)
         session.delete(item)
         session.commit()
         return redirect(url_for('home'))
@@ -314,9 +337,27 @@ def item_detail(category_name, item_title):
     item = session.query(Item).filter_by(
         category_id=category.id).filter_by(
             title=item_title).one()
+    has_img = vh.get_item_image_info(item.id) is not None
     return render_template('item.html',
                            session=login_session,
-                           item=item)
+                           item=item,
+                           has_img=has_img)
+
+
+@app.route('/catalog/item/<int:item_id>/img')
+def item_img(item_id):
+    try:
+        item = session.query(Item).filter_by(
+            id=item_id).one()
+    except NoResultFound:
+        return make_response(
+            json.dumps('Image not found'),
+            401)
+    img_info = vh.get_item_image_info(item.id)
+    if img_info is None:
+        raise Exception("programming or operation error")
+    return send_file(os.path.join('..', img_info['path']),
+                     mimetype='image/'+img_info['type'])
 
 
 @app.route('/catalog.json')

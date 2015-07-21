@@ -1,4 +1,4 @@
-<form method="post">
+<form method="post" enctype="multipart/form-data">
   <div class="form-group">
     <label for="title">Title</label>
     <input type="text" name="title" id="title"
@@ -31,6 +31,10 @@
       </option>
       {% endfor %}
     </select>
+  </div>
+  <div class="form-group">
+    <label for="picture">Picture</label>
+    <input type="file" name="picture" id="picture">
   </div>
   <button type="submit" class="btn">Submit</button>
 </form>

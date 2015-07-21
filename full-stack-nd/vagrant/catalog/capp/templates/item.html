@@ -5,6 +5,9 @@
   <div class="row">
     <div class="col-md-12">
       <h3>{{item.title}}</h3>
+      {% if has_img %}
+      <img src="/catalog/item/{{item.id}}/img">
+      {% endif %}
       <p>Description: {{item.description}}</p>
       <a href="{{url_for('item_edit', item_title=item.title)}}">
         Edit
