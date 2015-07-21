@@ -97,7 +97,9 @@ def login():
         login_session['state'] = state
         return render_template('login.html',
                                state=state,
-                               G_CLIENT_ID=G_CLIENT_ID)
+                               G_CLIENT_ID=G_CLIENT_ID,
+                               GH_CLIENT_ID=
+                               app.config['GITHUB_CLIENT_ID'])
 
 
 # disable for production, used only for dev w/o internet connection
