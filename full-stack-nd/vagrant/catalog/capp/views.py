@@ -30,6 +30,8 @@ from oauth2client.client import FlowExchangeError
 import httplib2
 import requests
 
+from dict2xml import dict2xml
+
 from models import User
 from models import Category
 from models import Item
@@ -375,12 +377,12 @@ def item_img(item_id):
 
 @app.route('/catalog.json')
 def json_catalog():
-    categories = session.query(Category).all()
-    categories_json = [c.serialize for c in categories]
-    for category_json in categories_json:
-        items = session.query(Item).filter_by(
-            category_id=category_json['id']).all()
-        if len(items) > 0:
-            category_json['Item'] = [
-                i.serialize for i in items]
-    return jsonify(Category=categories_json)
+    return jsonify(vh.serialize_catalog())
+
+
+@app.route('/catalog.xml')
+def xml_catalog():
+    xml = dict2xml(vh.serialize_catalog(), wrap="Catalog")
+    response = make_response(xml)
+    response.headers['Content-Type'] = 'application/xml'
+    return response

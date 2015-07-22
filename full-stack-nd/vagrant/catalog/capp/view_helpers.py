@@ -7,6 +7,7 @@ from wtforms.ext.sqlalchemy.orm import model_form
 from wtforms.validators import ValidationError
 
 from models import session
+from models import Category
 from models import User
 from models import Item
 
@@ -57,6 +58,19 @@ def get_item_image_info(item_id):
         'path': filepath,
         'type': img_type
     }
+
+
+def serialize_catalog():
+    categories = session.query(Category).all()
+    categories_json = [c.serialize for c in categories]
+    for category_json in categories_json:
+        items = session.query(Item).filter_by(
+            category_id=category_json['id']).all()
+        if len(items) > 0:
+            category_json['Item'] = [
+                i.serialize for i in items]
+    return {'Category': categories_json}
+
 
 class NotBlank(object):
     """ Custom wtforms validator to make sure text fields
