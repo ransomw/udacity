@@ -103,11 +103,11 @@ def login():
             for _ in range(32)
         )
         login_session['state'] = state
-        return render_template('login.html',
-                               state=state,
-                               G_CLIENT_ID=G_CLIENT_ID,
-                               GH_CLIENT_ID=
-                               app.config['GITHUB_CLIENT_ID'])
+        return render_template(
+            'login.html',
+            state=state,
+            G_CLIENT_ID=G_CLIENT_ID,
+            GH_CLIENT_ID=app.config['GITHUB_CLIENT_ID'])
 
 
 # disable for production, used only for dev w/o internet connection
@@ -244,8 +244,9 @@ def item_new():
     if request.method == 'POST':
         # store form data
         try:
-            item = vh.item_from_form(Item(), request.form,
-                              user_id=login_session.get('user_id'))
+            item = vh.item_from_form(
+                Item(), request.form,
+                user_id=login_session.get('user_id'))
         except ValueError as e:
             return "Database validation error: " + str(e)
         except SQLAlchemyError as e:

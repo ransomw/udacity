@@ -13,6 +13,7 @@ from models import Item
 
 from capp import app
 
+
 def get_create_user(name, email):
     """ get or create user record """
     try:
@@ -80,8 +81,8 @@ def store_item_pic(item, file_storage_pic):
             os.remove(file_type)
             return ("form data stored, but "
                     "uploaded file was not one of "
-                    "the supported types: "
-            ) + ', '.join(app.config['ITEM_IMG_EXTS'])
+                    "the supported types: ") + ', '.join(
+                        app.config['ITEM_IMG_EXTS'])
     return None
 
 
@@ -104,8 +105,8 @@ class NotBlank(object):
         pass
 
     def __call__(self, form, field):
-        if (field.data is not None and
-            field.data.strip() == ''):
+        if ((field.data is not None and
+             field.data.strip() == '')):
             raise ValidationError((
                 "{label} may not be blank"
                 ).format(label=field.label.text))
@@ -120,5 +121,5 @@ ItemForm = model_form(
     ],
     # ??? duplicate validation ok?
     field_args={
-        'description': {'validators': [NotBlank(),],},
+        'description': {'validators': [NotBlank(), ], },
     })
