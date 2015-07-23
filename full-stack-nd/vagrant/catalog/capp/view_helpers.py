@@ -60,6 +60,31 @@ def get_item_image_info(item_id):
     }
 
 
+def store_item_pic(item, file_storage_pic):
+    """
+    item: models.Item instance
+    file_store_pic: werkzeug.datastructures.FileStorage object
+    returns: str on error, None on success
+    """
+    if file_storage_pic.filename != '':
+        file_path = get_item_image_filepath(item.id)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        file_storage_pic.save(file_path)
+        file_type = imghdr.what(file_path)
+        if file_type is None:
+            os.remove(file_type)
+            return ("form data stored, but "
+                    "uploaded file was not an image")
+        if file_type not in app.config['ITEM_IMG_EXTS']:
+            os.remove(file_type)
+            return ("form data stored, but "
+                    "uploaded file was not one of "
+                    "the supported types: "
+            ) + ', '.join(app.config['ITEM_IMG_EXTS'])
+    return None
+
+
 def serialize_catalog():
     categories = session.query(Category).all()
     categories_json = [c.serialize for c in categories]

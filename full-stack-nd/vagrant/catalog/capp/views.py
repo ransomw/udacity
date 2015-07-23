@@ -6,6 +6,7 @@ import string
 import json
 from functools import wraps
 import imghdr
+import time
 
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
@@ -252,21 +253,10 @@ def item_new():
             # for security reasons
             return "Database error: " + str(e)
         # store image file
-        file_storage_pic = request.files['picture']
-        if file_storage_pic.filename != '':
-            file_path = vh.get_item_image_filepath(item.id)
-            file_storage_pic.save(file_path)
-            file_type = imghdr.what(file_path)
-            if file_type is None:
-                os.remove(file_type)
-                return ("form data stored, but "
-                        "uploaded file was not an image")
-            if file_type not in app.config['ITEM_IMG_EXTS']:
-                os.remove(file_type)
-                return ("form data stored, but "
-                        "uploaded file was not one of "
-                        "the supported types: "
-                ) + ', '.join(app.config['ITEM_IMG_EXTS'])
+        file_storage_err = vh.store_item_pic(
+            item, request.files['picture'])
+        if file_storage_err is not None:
+            return file_storage_err
         return redirect(url_for('home'))
     else:
         categories = session.query(Category).all()
@@ -286,9 +276,12 @@ def item_edit(item_title):
         return redirect(url_for('home'))
     if request.method == 'POST':
         form = vh.ItemForm(request.form, item)
-        if not form.validate():
+        file_storage_err = vh.store_item_pic(
+            item, request.files['picture'])
+        if (not form.validate() or file_storage_err is not None):
             return render_template('item_edit.html',
-                                   form=form)
+                                   form=form,
+                                   file_err=file_storage_err)
         form.populate_obj(item)
         try:
             session.add(item)
@@ -303,7 +296,8 @@ def item_edit(item_title):
     else:
         form = vh.ItemForm(obj=item)
         return render_template('item_edit.html',
-                               form=form)
+                               form=form,
+                               file_err=None)
 
 
 @app.route('/catalog/<string:item_title>/delete',
@@ -356,7 +350,8 @@ def item_detail(category_name, item_title):
                            session=login_session,
                            item=item,
                            has_img=has_img,
-                           can_modify=can_modify)
+                           can_modify=can_modify,
+                           rand_q=time.time())
 
 
 @app.route('/catalog/item/<int:item_id>/img')
