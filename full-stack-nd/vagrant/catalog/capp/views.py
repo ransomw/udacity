@@ -375,6 +375,19 @@ def item_img(item_id):
                      mimetype='image/'+img_info['type'])
 
 
+@app.route('/api/category')
+def api_categories():
+    categories = session.query(Category).all()
+    return jsonify(Categories=[c.serialize for c in categories])
+
+
+@app.route('/api/item')
+def api_items():
+    print "top of api_items"
+    items = session.query(Item).all()
+    return jsonify(Items=[i.serialize for i in items])
+
+
 @app.route('/catalog.json')
 def json_catalog():
     return jsonify(vh.serialize_catalog())

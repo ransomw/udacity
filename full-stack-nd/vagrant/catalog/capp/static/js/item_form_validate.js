@@ -15,23 +15,43 @@ $(function () {
   //     as its only argument if there's an error and
   //     undefined if there's not an error
   var rule_non_empty = function (val, cb) {
-    // settimeout to simulate server side call
-    // todo: remove settimeout
-    window.setTimeout(function () {
-
       if (val.trim() === '') {
         cb("may not be empty");
       } else {
         cb(undefined);
       }
+  };
 
-    }, 1000);
+  var rule_title_no_dup = function (val, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          var item_resp_json = JSON.parse(xhr.responseText);
+          var item_titles = item_resp_json['Items']
+                .map(function (item_json) {
+                  return item_json['title'];
+                });
+          if (item_titles.indexOf(val.trim()) !== -1) {
+            cb("Duplicate item name");
+          } else {
+            cb(undefined);
+          }
+        } else {
+          // ??? how to handle validation w/o server data?
+          cb(undefined);
+        }
+      }
+    };
+    xhr.open('GET', '/api/item');
+    xhr.send();
   };
 
   // map inputs to rules
   var rules = {
     'title': [
-      rule_non_empty
+      rule_non_empty,
+      rule_title_no_dup
     ],
     'description': [
       rule_non_empty
@@ -126,8 +146,10 @@ $(function () {
     var curr_cb;
 
     // normally using an async library would be preferable,
-    // but just as an exercise in chaining callbacks...
+    // but just as an exercise in using callbacks...
     // todo: handle the case where Object.keys(rules).length === 0
+    // todo: run all callbacks simultaneously
+    //       like Promise.all() rather than Promise.next()
     Object.keys(rules).forEach(function (r_name) {
       rules[r_name].forEach(function (rule) {
         if (prev_cb === undefined) {

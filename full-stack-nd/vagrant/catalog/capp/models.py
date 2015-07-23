@@ -87,6 +87,9 @@ Base.metadata.create_all(engine)
 # ??? is it appropriate to initialize a DB session here?
 # I want to use the same session in both the view and view_helper
 # modules but avoid circular imports
+# todo: must figure out some other way to manage session
+#       in order to avoid application crashes when session
+#       gets disconnected or has a transaction to be rolled back
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
