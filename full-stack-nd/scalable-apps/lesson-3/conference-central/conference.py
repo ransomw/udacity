@@ -29,6 +29,8 @@ from models import TeeShirtSize
 
 from settings import WEB_CLIENT_ID
 
+from utils import getUserId
+
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
@@ -65,24 +67,28 @@ class ConferenceApi(remote.Service):
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
 
-        # TODO 1
+        # TODO 1 X
         # step 1. copy utils.py from additions folder to this folder
         #         and import getUserId from it
         # step 2. get user id by calling getUserId(user)
         # step 3. create a new key of kind Profile from the id
 
-        # TODO 3
+        user_id = getUserId(user)
+        p_key = ndb.Key(Profile, user_id)
+
+        # TODO 3 X
         # get the entity from datastore by using get() on the key
-        profile = None
+        profile = p_key.get()
         if not profile:
             profile = Profile(
-                key = None, # TODO 1 step 4. replace with the key from step 3
-                displayName = user.nickname(), 
+                key = p_key,
+                displayName = user.nickname(),
                 mainEmail= user.email(),
                 teeShirtSize = str(TeeShirtSize.NOT_SPECIFIED),
             )
-            # TODO 2
+            # TODO 2 X
             # save the profile to datastore
+            profile.put()
 
         return profile      # return Profile
 
@@ -101,6 +107,7 @@ class ConferenceApi(remote.Service):
                         setattr(prof, field, str(val))
             # TODO 4
             # put the modified profile to datastore
+            prof.put()
 
         # return ProfileForm
         return self._copyProfileToForm(prof)
@@ -121,4 +128,4 @@ class ConferenceApi(remote.Service):
 
 
 # registers API
-api = endpoints.api_server([ConferenceApi]) 
+api = endpoints.api_server([ConferenceApi])
